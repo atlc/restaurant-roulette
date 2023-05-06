@@ -21,32 +21,32 @@ function App() {
         } else {
             setRestaurants([
                 { name: "Hotbox", weight: 0.5 },
-                { name: "Paramount", weight: 0.5 }, 
+                { name: "Paramount", weight: 0.5 },
                 { name: "Marty's PM", weight: 0.5 },
                 { name: "Saw's", weight: 0.5 },
                 { name: "Jack Brown's", weight: 0.5 },
                 { name: "Eugene's", weight: 0.5 },
                 { name: "Hattie B's", weight: 0.5 },
                 { name: "Giuseppe's", weight: 0.5 }
-            ])
+            ]);
         }
-    }, [])
+    }, []);
 
     useEffect(() => {
         if (!restaurants.length) return;
 
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(restaurants))
-    }, [restaurants])
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(restaurants));
+    }, [restaurants]);
 
     const handleAddRestaurant = () => {
         if (!newName) return;
         setRestaurants([...restaurants, { name: newName, weight: 0.5 }]);
         setNewName("");
-    }
+    };
 
     const handleRemoveRestaurant = (name: string) => {
         setRestaurants(restaurants.filter(rs => rs.name !== name));
-    }
+    };
 
     const handleAdjustWeights = (e: React.ChangeEvent<HTMLInputElement>) => {
         const temp = Array.from(restaurants);
@@ -69,15 +69,15 @@ function App() {
         if (e.key === "Enter") {
             handleAddRestaurant();
         }
-    }
+    };
 
     return (
         <div className="App">
             <div>
-                <button onClick={handleReset}>Reset weights</button>
+                <button onClick={handleReset}>Reset</button>
                 <button onClick={calculateRandomChoice}>
                     {!choice ? (
-                        "Get a random choice!"
+                        "Random choice!"
                     ) : (
                         <span>
                             <strong>{choice}</strong>. Choose again?
@@ -87,15 +87,15 @@ function App() {
             </div>
 
             <div>
-                <input onKeyDown={e => handleSubmitOnEnter(e)} value={newName} onChange={e => setNewName(e.target.value)} type="text" />
-                <span onClick={handleAddRestaurant} style={{ color: "green", fontSize: "1.5rem" }}>+</span>
+                <input placeholder="Add your restaurant here!" onKeyDown={e => handleSubmitOnEnter(e)} value={newName} onChange={e => setNewName(e.target.value)} type="text" />
+                <button style={{ color: "#00ff33" }} onClick={handleAddRestaurant}>+1</button>
             </div>
 
             {restaurants.map((rs, i) => (
                 <div key={`restaurant-div-${i}`}>
-                    <label>{rs.name}</label>
-                    <input onChange={handleAdjustWeights} name={rs.name} type="range" step={0.05} value={rs.weight} max={1} />
-                    <span onClick={() => handleRemoveRestaurant(rs.name)} style={{ color: "red", fontSize: "1.5rem"}}>x</span>
+                    <label className="center-vert">{rs.name}</label>
+                    <input className="center-vert" onChange={handleAdjustWeights} name={rs.name} type="range" step={0.05} value={rs.weight} max={1} />
+                    <span className="center-vert" onClick={() => handleRemoveRestaurant(rs.name)} style={{ color: "red", fontSize: "1.25rem" }}>X</span>
                 </div>
             ))}
         </div>
