@@ -1,14 +1,45 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  margin: auto;
   text-align: center;
 }
 
 button {
+  color: #e9e9ed;
   margin: 5px;
+}
+
+label {
+  color: #e9e9ed;
+}
+
+input {
+  background-color: #2b2a33;
+    color: #e9e9ed;
 }
 
 .center-vert {
   vertical-align: middle;
+}
+
+.col-left {
+  display: flex;
+  justify-content: start;
+  margin: auto;
+}
+
+
+.col-right {
+  display: flex;
+  justify-content: end;
+}
+
+.row {
+  display: flex;
+  width: 100%;
+}
+
+.smol {
+  opacity: 0.3;
+  margin: 11px;
+  font-size: 0.8rem;
 }
