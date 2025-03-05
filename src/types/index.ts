@@ -8,3 +8,7 @@ export interface RestaurantProfile {
     isActive: boolean;
     restaurants: Restaurant[];
 }
+
+export type UserProfile = {
+    [key: string]: RestaurantProfile;
+}

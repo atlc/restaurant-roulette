@@ -1,28 +1,32 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { INITIAL_STATE } from "./constants";
-import { Restaurant } from "./types";
-import { getRestaurants, saveRestaurants } from "./services/localStorage";
+import { Restaurant, RestaurantProfile, UserProfile } from "./types";
+import { getUserProfile } from "./services/localStorage";
+import { DEFAULT_USER_PROFILE } from "./constants/restaurants";
 
 
 const App = () => {
     const [choice, setChoice] = useState("");
     const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+    const [userProfile, setUserProfile] = useState<UserProfile>(DEFAULT_USER_PROFILE);
+    const [currentProfileKey, setCurrentProfileKey] = useState<string>("keysys");
 
+    
     useEffect(() => {
-        const store = getRestaurants();
-        setRestaurants(store);
+        const profile = getUserProfile();
+        setUserProfile(profile);
     }, []);
 
     useEffect(() => {
         if (!restaurants.length) {
-            saveRestaurants(INITIAL_STATE);
-            setRestaurants(INITIAL_STATE);
+            setRestaurants(userProfile[currentProfileKey].restaurants);
             return;
         }
-
-        saveRestaurants(restaurants);
     }, [restaurants]);
+
+    useEffect(() => {
+        setRestaurants(userProfile[currentProfileKey].restaurants);
+    }, [currentProfileKey]);
 
     const handleRemoveRestaurant = (name: string) => {
         setRestaurants(restaurants.filter((rs) => rs.name !== name));
@@ -48,7 +52,7 @@ const App = () => {
         }
         let random = Math.random() * allChoicesWeight;
         let randomChoice = null;
-        
+
         for (const restaurant of restaurants) {
             random -= restaurant.weight;
             if (random <= 0) {
@@ -60,7 +64,7 @@ const App = () => {
         if (!randomChoice && restaurants.length) {
             randomChoice = restaurants[restaurants.length - 1].name;
         }
-        
+
         setChoice(randomChoice || "Nothing!");
     };
 
@@ -83,7 +87,7 @@ const App = () => {
     };
 
     return (
-        <div className="App">
+        <main>
             <div>
                 <button onClick={handleResetWeight}>Reset weights</button>
                 <button onClick={calculateRandomChoice}>{!choice ? "Random choice!" : "Try again?"}</button>
@@ -92,40 +96,52 @@ const App = () => {
                 </h1>
             </div>
 
-            {restaurants.map((rs, i) => (
-                <div className="row" key={`restaurant-div-${i}`}>
-                    <div className="col-left">
-                        <label>{rs.name}</label>
-                    </div>
-                    <div className="col-right">
-                        <div className="weight-container">
-                            <input
+            <div className="row">
+                <h2>Profile: {currentProfileKey}</h2>
+                <h3>Profile list</h3>
+                <ul>
+                    {Object.keys(userProfile).map((key) => (
+                        <li onClick={() => setCurrentProfileKey(key)} key={key}>{key}</li>
+                    ))}
+                </ul>
+            </div>
+
+            <div className="container">
+                {userProfile[currentProfileKey].restaurants.map((rs, i) => (
+                    <div className="row" key={`restaurant-div-${i}`}>
+                        <div className="col-left">
+                            <label>{rs.name}</label>
+                        </div>
+                        <div className="col-right">
+                            <div className="weight-container">
+                                <input
+                                    className="center-vert"
+                                    onChange={handleAdjustWeights}
+                                    name={rs.name}
+                                    type="range"
+                                    step={0.05}
+                                    value={rs.weight}
+                                    max={1}
+                                />
+                                <span
+                                    className="weight-label"
+                                    style={{ color: getWeightColor(rs.weight) }}
+                                >
+                                    {getWeightDescription(rs.weight)}
+                                </span>
+                            </div>
+                            <span
                                 className="center-vert"
-                                onChange={handleAdjustWeights}
-                                name={rs.name}
-                                type="range"
-                                step={0.05}
-                                value={rs.weight}
-                                max={1}
-                            />
-                            <span 
-                                className="weight-label"
-                                style={{ color: getWeightColor(rs.weight) }}
+                                onClick={() => handleRemoveRestaurant(rs.name)}
+                                style={{ color: "red", fontSize: "1.25rem" }}
                             >
-                                {getWeightDescription(rs.weight)}
+                                X
                             </span>
                         </div>
-                        <span
-                            className="center-vert"
-                            onClick={() => handleRemoveRestaurant(rs.name)}
-                            style={{ color: "red", fontSize: "1.25rem" }}
-                        >
-                            X
-                        </span>
                     </div>
-                </div>
-            ))}
-        </div>
+                ))}
+            </div>
+        </main>
     );
 };
 

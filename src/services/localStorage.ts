@@ -1,14 +1,13 @@
-import { RestaurantProfile, Restaurant } from "../types";
-import { INITIAL_STATE } from "../constants";
+import { RestaurantProfile, Restaurant, UserProfile } from "../types";
+import  { DEFAULT_USER_PROFILE } from "../constants/restaurants";
 
-export const RESTAURANT_KEY = "restaurants";
-export const RESTAURANT_PROFILE_KEY = "restaurantProfiles";
+export const USER_PROFILE_KEY = "profile";
 
-export const getRestaurants = (): Restaurant[] => {
-    const store = localStorage.getItem(RESTAURANT_KEY);
-    return store ? JSON.parse(store) : INITIAL_STATE;
+export const getUserProfile = (): UserProfile => {
+    const store = localStorage.getItem(USER_PROFILE_KEY);
+    return store ? JSON.parse(store) : DEFAULT_USER_PROFILE;
 };
 
-export const saveRestaurants = (restaurants: Restaurant[]) => {
-    localStorage.setItem(RESTAURANT_KEY, JSON.stringify(restaurants));
+export const saveUserProfile = (userProfile: UserProfile) => {
+    localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(userProfile));
 };
