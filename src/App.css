@@ -651,3 +651,7 @@ input[type="range"]::-moz-range-thumb:hover {
     margin: 0;
   }
 }
+
+.m-2 {
+  margin: 2rem;
+}

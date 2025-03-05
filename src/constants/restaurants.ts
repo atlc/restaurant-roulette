@@ -1,4 +1,4 @@
-import { Restaurant, RestaurantProfile, UserProfile } from "../types";
+import { ConfirmationModal, Restaurant, UserProfile } from "../types";
 
 export const DEFAULT_BIRMINGHAM_RESTAURANTS: Restaurant[] = [
     { name: "Hotbox", weight: 0.5 },
@@ -11,15 +11,15 @@ export const DEFAULT_BIRMINGHAM_RESTAURANTS: Restaurant[] = [
     { name: "Giuseppe's", weight: 0.5 },
 ];
 
-const DEFAULT_KEYSYS_RESTAURANTS = [
+const DEFAULT_KEYSYS_RESTAURANTS: Restaurant[] = [
     { name: "Davenports", weight: 0.8 },
     { name: "Waldo's", weight: 0.5 },
+    { name: "Maro", weight: 0.5 },
     { name: "Buffalo Wild Wings", weight: 0.5 },
     { name: "Chick-fil-A", weight: 0.5 },
     { name: "Milo's", weight: 0.5 },
+    { name: "Zaxby's", weight: 0.5 },
 ];
-
-
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
     keysys: {
@@ -27,9 +27,17 @@ export const DEFAULT_USER_PROFILE: UserProfile = {
         name: "KeySys HQ",
         restaurants: DEFAULT_KEYSYS_RESTAURANTS,
     },
-    birmingham: {
+    downtown: {
         isActive: false,
-        name: "Birmingham",
+        name: "Downtown",
         restaurants: DEFAULT_BIRMINGHAM_RESTAURANTS,
     },
 };
+
+export const INITIAL_MODAL_STATE: ConfirmationModal = {
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => { },
+    onCancel: () => { }
+}

@@ -18,4 +18,5 @@ export interface ConfirmationModal {
     message: string;
     onConfirm: () => void;
     onCancel: () => void;
+    showButtons?: boolean;
 }

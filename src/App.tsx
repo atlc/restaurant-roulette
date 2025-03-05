@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import { Restaurant, UserProfile, ConfirmationModal } from "./types";
 import { getUserProfile, persistUserProfile } from "./services/localStorage";
-import { DEFAULT_USER_PROFILE } from "./constants/restaurants";
+import { DEFAULT_USER_PROFILE, INITIAL_MODAL_STATE } from "./constants/restaurants";
+import Modal from "./components/Modal";
+import Profile from "./components/Profile";
 
 const App = () => {
     const [choice, setChoice] = useState("");
@@ -11,15 +13,11 @@ const App = () => {
     const [currentProfileKey, setCurrentProfileKey] = useState<string>("keysys");
     const [newRestaurantName, setNewRestaurantName] = useState("");
     const [addRestaurantExpanded, setAddRestaurantExpanded] = useState(false);
-    const [newProfileName, setNewProfileName] = useState("");
-    const [addProfileExpanded, setAddProfileExpanded] = useState(false);
-    const [confirmModal, setConfirmModal] = useState<ConfirmationModal>({
-        isOpen: false,
-        title: "",
-        message: "",
-        onConfirm: () => {},
-        onCancel: () => {}
-    });
+    const [confirmModal, setConfirmModal] = useState<ConfirmationModal>(INITIAL_MODAL_STATE);
+
+    const resetModal = () => {
+        setConfirmModal(INITIAL_MODAL_STATE);
+    }
 
     useEffect(() => {
         const profile = getUserProfile();
@@ -53,7 +51,6 @@ const App = () => {
         setUserProfile(updatedUser);
     }, [currentProfileKey]);
 
-    // Handle keyboard events for modal
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape' && confirmModal.isOpen) {
@@ -99,12 +96,6 @@ const App = () => {
         }
     };
 
-    const handleProfileKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            handleAddProfile();
-        }
-    };
-
     const handleAddRestaurant = () => {
         if (newRestaurantName.trim() !== '') {
             const newRestaurant: Restaurant = {
@@ -114,60 +105,6 @@ const App = () => {
             setRestaurants([...restaurants, newRestaurant]);
             setNewRestaurantName('');
         }
-    };
-
-    const handleAddProfile = () => {
-        if (newProfileName.trim() !== '') {
-            // Create a sanitized key (lowercase, no spaces)
-            const profileKey = newProfileName.trim().toLowerCase().replace(/\s+/g, '_');
-            
-            // Check if profile already exists
-            if (userProfile[profileKey]) {
-                alert(`A profile with the name "${newProfileName}" already exists.`);
-                return;
-            }
-            
-            // Create new profile
-            const updatedProfile = {
-                ...userProfile,
-                [profileKey]: {
-                    name: newProfileName.trim(),
-                    isActive: false,
-                    restaurants: []
-                }
-            };
-            
-            setUserProfile(updatedProfile);
-            setNewProfileName('');
-            setCurrentProfileKey(profileKey);
-            setAddProfileExpanded(false);
-        }
-    };
-
-    const handleDeleteProfile = (key: string) => {
-        // Don't allow deleting the last profile
-        if (Object.keys(userProfile).length <= 1) {
-            alert("Cannot delete the last profile. At least one profile must exist.");
-            return;
-        }
-        setConfirmModal({
-            isOpen: true,
-            title: "Delete Profile",
-            message: `Are you sure you want to delete the profile "${userProfile[key].name}"?`,
-            onConfirm: () => {
-                const { [key]: deletedProfile, ...remainingProfiles } = userProfile;
-                if (key === currentProfileKey) {
-                    const newKey = Object.keys(remainingProfiles)[0];
-                    setCurrentProfileKey(newKey);
-                }
-                
-                setUserProfile(remainingProfiles);
-                setConfirmModal(prev => ({ ...prev, isOpen: false }));
-            },
-            onCancel: () => {
-                setConfirmModal(prev => ({ ...prev, isOpen: false }));
-            }
-        });
     };
 
     const calculateRandomChoice = () => {
@@ -217,74 +154,24 @@ const App = () => {
         setAddRestaurantExpanded(!addRestaurantExpanded);
     };
 
-    const toggleAddProfileSection = () => {
-        setAddProfileExpanded(!addProfileExpanded);
-    };
+    const showPrivacyPolicy = () => {
+        setConfirmModal({
+            isOpen: true,
+            title: "Privacy Policy",
+            message: "Your data is not collected or shared with or by anyone. No cookies or tracking are used. All data is stored only locally, only in your browser.",
+            onConfirm: resetModal,
+            onCancel: resetModal,
+            showButtons: false
+        });
+    }
 
     return (
         <main>
-            <div className="random-choice-section">
-                <div>
-                    <button onClick={handleResetWeight}>Reset Weights</button>
-                    <button onClick={calculateRandomChoice}>
-                        {!choice ? "Random Choice!" : "Try Again?"}
-                    </button>
-                </div>
-                <h1>
-                    <strong>{choice || "Ready to choose!"}</strong>
-                </h1>
-            </div>
-
-            <div className="profile-section">
-                <div className="profile-header">
-                    <h3>Profiles</h3>
-                    <div onClick={toggleAddProfileSection} className={`toggle-icon ${addProfileExpanded ? 'expanded' : ''}`}>
-                        ▼
-                    </div>
-                </div>
-                
-                <div className={`add-profile-content ${addProfileExpanded ? 'expanded' : ''}`}>
-                    <div className="row" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
-                        <input
-                            type="text"
-                            placeholder="Enter new profile name"
-                            value={newProfileName}
-                            onChange={(e) => setNewProfileName(e.target.value)}
-                            onKeyDown={handleProfileKeyDown}
-                        />
-                        <button className="success-button" onClick={handleAddProfile}>Add Profile</button>
-                    </div>
-                    
-                    <h4 className="profile-management-title">Manage Profiles</h4>
-                    <div className="profile-management-list">
-                        {Object.keys(userProfile).map((key) => (
-                            <div className="profile-management-item" key={`manage-${key}`}>
-                                <span>{userProfile[key].name}</span>
-                                {Object.keys(userProfile).length > 1 && (
-                                    <span 
-                                        className="remove-btn" 
-                                        onClick={() => handleDeleteProfile(key)}
-                                    >
-                                        ×
-                                    </span>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-                
-                <div className="profile-list">
-                    {Object.keys(userProfile).map((key) => (
-                        <div 
-                            className={`profile-item ${key === currentProfileKey ? 'active' : ''}`}
-                            key={key}
-                            onClick={() => setCurrentProfileKey(key)}
-                        >
-                            <span>{userProfile[key].name}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
+            <Profile
+                userProfile={userProfile}
+                currentProfileKey={currentProfileKey}
+                setConfirmModal={setConfirmModal}
+             />
 
             <div className="add-restaurant-section">
                 <div className="add-restaurant-header" onClick={toggleAddRestaurantSection}>
@@ -348,27 +235,24 @@ const App = () => {
                 )}
             </div>
 
-            <div className="footer">
-                <p>Made with ❤️ by <a className="text-green" href="https://github.com/atlc/restaurant-roulette">Cartwright</a></p>
+            <div className="random-choice-section">
+                <div>
+                    <button onClick={handleResetWeight}>Reset Weights</button>
+                    <button onClick={calculateRandomChoice}>
+                        {!choice ? "Random Choice!" : "Try Again?"}
+                    </button>
+                </div>
+                <h1>
+                    <strong>{choice || "Ready to choose!"}</strong>
+                </h1>
             </div>
 
-            {confirmModal.isOpen && (
-                <div className="modal-overlay" onClick={confirmModal.onCancel}>
-                    <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h3>{confirmModal.title}</h3>
-                            <button className="modal-close" onClick={confirmModal.onCancel}>×</button>
-                        </div>
-                        <div className="modal-content">
-                            <p>{confirmModal.message}</p>
-                        </div>
-                        <div className="modal-actions">
-                            <button onClick={confirmModal.onCancel}>Cancel</button>
-                            <button className="danger-button" onClick={confirmModal.onConfirm}>Confirm</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <div className="footer">
+                <p>Made with ❤️ by <a className="text-green" href="https://github.com/atlc/restaurant-roulette">Cartwright</a></p>
+                <p className="text-green" onClick={showPrivacyPolicy}>Privacy Policy</p>
+            </div>
+
+            {confirmModal.isOpen && <Modal {...confirmModal} />}
         </main>
     );
 };
