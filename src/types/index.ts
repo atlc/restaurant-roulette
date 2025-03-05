@@ -9,6 +9,13 @@ export interface RestaurantProfile {
     restaurants: Restaurant[];
 }
 
-export type UserProfile = {
+export interface UserProfile {
     [key: string]: RestaurantProfile;
+}
+export interface ConfirmationModal {
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    onCancel: () => void;
 }

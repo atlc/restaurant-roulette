@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { Restaurant, RestaurantProfile, UserProfile } from "./types";
-import { getUserProfile, saveUserProfile } from "./services/localStorage";
+import { Restaurant, UserProfile, ConfirmationModal } from "./types";
+import { getUserProfile, persistUserProfile } from "./services/localStorage";
 import { DEFAULT_USER_PROFILE } from "./constants/restaurants";
-
 
 const App = () => {
     const [choice, setChoice] = useState("");
@@ -14,6 +13,13 @@ const App = () => {
     const [addRestaurantExpanded, setAddRestaurantExpanded] = useState(false);
     const [newProfileName, setNewProfileName] = useState("");
     const [addProfileExpanded, setAddProfileExpanded] = useState(false);
+    const [confirmModal, setConfirmModal] = useState<ConfirmationModal>({
+        isOpen: false,
+        title: "",
+        message: "",
+        onConfirm: () => {},
+        onCancel: () => {}
+    });
 
     useEffect(() => {
         const profile = getUserProfile();
@@ -21,16 +27,19 @@ const App = () => {
     }, []);
 
     useEffect(() => {
+        persistUserProfile(userProfile);
+    }, [userProfile])
+    
+    useEffect(() => {
         const updatedProfile = {
             ...userProfile,
             [currentProfileKey]: {
                 ...userProfile[currentProfileKey],
-                restaurants: restaurants
+                restaurants
             }
         };
         
         setUserProfile(updatedProfile);
-        saveUserProfile(updatedProfile);
     }, [restaurants]);
 
     useEffect(() => {
@@ -42,11 +51,35 @@ const App = () => {
         });
         
         setUserProfile(updatedUser);
-        saveUserProfile(updatedUser);
     }, [currentProfileKey]);
 
+    // Handle keyboard events for modal
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && confirmModal.isOpen) {
+                confirmModal.onCancel();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [confirmModal]);
+
     const handleRemoveRestaurant = (name: string) => {
-        setRestaurants(restaurants.filter((rs) => rs.name !== name));
+        setConfirmModal({
+            isOpen: true,
+            title: "Remove Restaurant",
+            message: `Are you sure you want to remove "${name}" from your list?`,
+            onConfirm: () => {
+                setRestaurants(restaurants.filter((rs) => rs.name !== name));
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+            },
+            onCancel: () => {
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+            }
+        });
     };
 
     const handleAdjustWeights = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,13 +93,13 @@ const App = () => {
         setRestaurants(restaurants.map((rs) => ({ ...rs, weight: 0.5 })));
     };
 
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             handleAddRestaurant();
         }
     };
 
-    const handleProfileKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleProfileKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             handleAddProfile();
         }
@@ -105,7 +138,6 @@ const App = () => {
             };
             
             setUserProfile(updatedProfile);
-            saveUserProfile(updatedProfile);
             setNewProfileName('');
             setCurrentProfileKey(profileKey);
             setAddProfileExpanded(false);
@@ -118,24 +150,24 @@ const App = () => {
             alert("Cannot delete the last profile. At least one profile must exist.");
             return;
         }
-
-        // Confirm deletion
-        if (!window.confirm(`Are you sure you want to delete the profile "${userProfile[key].name}"?`)) {
-            return;
-        }
-
-        // Create a copy of the profile without the deleted key
-        const { [key]: deletedProfile, ...remainingProfiles } = userProfile;
-        
-        // If we're deleting the current profile, switch to another one
-        if (key === currentProfileKey) {
-            const newKey = Object.keys(remainingProfiles)[0];
-            setCurrentProfileKey(newKey);
-        }
-        
-        // Update the profile
-        setUserProfile(remainingProfiles);
-        saveUserProfile(remainingProfiles);
+        setConfirmModal({
+            isOpen: true,
+            title: "Delete Profile",
+            message: `Are you sure you want to delete the profile "${userProfile[key].name}"?`,
+            onConfirm: () => {
+                const { [key]: deletedProfile, ...remainingProfiles } = userProfile;
+                if (key === currentProfileKey) {
+                    const newKey = Object.keys(remainingProfiles)[0];
+                    setCurrentProfileKey(newKey);
+                }
+                
+                setUserProfile(remainingProfiles);
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+            },
+            onCancel: () => {
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+            }
+        });
     };
 
     const calculateRandomChoice = () => {
@@ -218,7 +250,7 @@ const App = () => {
                             placeholder="Enter new profile name"
                             value={newProfileName}
                             onChange={(e) => setNewProfileName(e.target.value)}
-                            onKeyPress={handleProfileKeyPress}
+                            onKeyDown={handleProfileKeyDown}
                         />
                         <button className="success-button" onClick={handleAddProfile}>Add Profile</button>
                     </div>
@@ -268,7 +300,7 @@ const App = () => {
                             placeholder="Enter restaurant name"
                             value={newRestaurantName}
                             onChange={(e) => setNewRestaurantName(e.target.value)}
-                            onKeyPress={handleKeyPress}
+                            onKeyDown={handleKeyDown}
                         />
                         <button className="success-button" onClick={handleAddRestaurant}>Add</button>
                     </div>
@@ -319,6 +351,24 @@ const App = () => {
             <div className="footer">
                 <p>Made with ❤️ by <a className="text-green" href="https://github.com/atlc/restaurant-roulette">Cartwright</a></p>
             </div>
+
+            {confirmModal.isOpen && (
+                <div className="modal-overlay" onClick={confirmModal.onCancel}>
+                    <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>{confirmModal.title}</h3>
+                            <button className="modal-close" onClick={confirmModal.onCancel}>×</button>
+                        </div>
+                        <div className="modal-content">
+                            <p>{confirmModal.message}</p>
+                        </div>
+                        <div className="modal-actions">
+                            <button onClick={confirmModal.onCancel}>Cancel</button>
+                            <button className="danger-button" onClick={confirmModal.onConfirm}>Confirm</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 };

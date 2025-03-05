@@ -8,6 +8,6 @@ export const getUserProfile = (): UserProfile => {
     return store ? JSON.parse(store) : DEFAULT_USER_PROFILE;
 };
 
-export const saveUserProfile = (userProfile: UserProfile) => {
+export const persistUserProfile = (userProfile: UserProfile) => {
     localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(userProfile));
 };
