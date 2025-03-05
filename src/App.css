@@ -31,15 +31,144 @@ input {
 .col-right {
   display: flex;
   justify-content: end;
+  align-items: center;
 }
 
 .row {
   display: flex;
   width: 100%;
+  margin-bottom: 10px;
 }
 
 .smol {
   opacity: 0.3;
   margin: 11px;
   font-size: 0.8rem;
+}
+
+/* Weight styling */
+.weight-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.weight-label {
+  font-size: 0.8rem;
+  margin-top: 2px;
+  font-weight: bold;
+  min-width: 70px;
+  text-align: center;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 150px;
+  height: 8px;
+  background: #2b2a33;
+  border-radius: 5px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #e9e9ed;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #e9e9ed;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  background: #ffffff;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  background: #ffffff;
+}
+
+/* List selector styles */
+.list-selector {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #444;
+  padding-bottom: 15px;
+}
+
+.list-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.list-controls h2 {
+  margin: 0;
+  color: #e9e9ed;
+}
+
+.add-list-form {
+  display: flex;
+  align-items: center;
+}
+
+.add-list-form input {
+  margin-right: 5px;
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #444;
+}
+
+.list-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.list-tab {
+  background-color: #2b2a33;
+  color: #e9e9ed;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.list-tab:hover {
+  background-color: #3b3a43;
+}
+
+.list-tab.active {
+  background-color: #4b4a53;
+  font-weight: bold;
+}
+
+.remove-list {
+  margin-left: 8px;
+  font-size: 16px;
+  color: #ff6b6b;
+  opacity: 0.7;
+}
+
+.remove-list:hover {
+  opacity: 1;
+}
+
+.active-list h2 {
+  color: #e9e9ed;
+  margin-top: 0;
 }
