@@ -1,18 +1,21 @@
 import React, { useState } from "react";
-import { ConfirmationModal, UserProfile } from "../types";
+import { useProfileStore } from "../store/profile";
+import { useModalStore } from "../store/modal";
 
+const Profile = () => {
+    const userProfile = useProfileStore(store => store.userProfile);
+    const currentProfileKey = useProfileStore(store => store.currentProfileKey);
+    const newProfileName = useProfileStore(store => store.newProfileName);
+    const addProfileExpanded = useProfileStore(store => store.addProfileExpanded);
 
-interface ProfileProps {
-    userProfile: UserProfile;
-    currentProfileKey: string;
-    setConfirmModal: React.Dispatch<React.SetStateAction<ConfirmationModal>>;
-}
+    const setUserProfile = useProfileStore(store => store.setUserProfile);
+    const setCurrentProfileKey = useProfileStore(store => store.setCurrentProfileKey);
+    const setNewProfileName = useProfileStore(store => store.setNewProfileName);
+    const setAddProfileExpanded = useProfileStore(store => store.setAddProfileExpanded);
 
-const Profile: React.FC<ProfileProps> = ({ userProfile, currentProfileKey, setConfirmModal }) => {
-    const [newProfileName, setNewProfileName] = useState("");
-    const [addProfileExpanded, setAddProfileExpanded] = useState(false);
+    const launchModal = useModalStore(store => store.launch);
+    const setIsOpen = useModalStore(store => store.setIsOpen);
 
-    
     const toggleAddProfileSection = () => {
         setAddProfileExpanded(!addProfileExpanded);
     };
@@ -20,18 +23,16 @@ const Profile: React.FC<ProfileProps> = ({ userProfile, currentProfileKey, setCo
     const handleAddProfile = () => {
         if (newProfileName.trim() !== '') {
             const profileKey = newProfileName.trim().toLowerCase().replace(/\s+/g, '_');
-            
+
             if (userProfile[profileKey]) {
-                setConfirmModal({
-                    isOpen: true,
+                launchModal({
                     title: "Profile Already Exists",
                     message: `A profile with the name "${newProfileName}" already exists.`,
-                    onConfirm: resetModal,
-                    onCancel: resetModal
+                    showButtons: false
                 });
                 return;
             }
-            
+
             const updatedProfile = {
                 ...userProfile,
                 [profileKey]: {
@@ -40,7 +41,7 @@ const Profile: React.FC<ProfileProps> = ({ userProfile, currentProfileKey, setCo
                     restaurants: []
                 }
             };
-            
+
             setUserProfile(updatedProfile);
             setNewProfileName('');
             setCurrentProfileKey(profileKey);
@@ -51,32 +52,31 @@ const Profile: React.FC<ProfileProps> = ({ userProfile, currentProfileKey, setCo
     const handleDeleteProfile = (key: string) => {
         // Don't allow deleting the last profile
         if (Object.keys(userProfile).length <= 1) {
-            setConfirmModal({
-                isOpen: true,
+            launchModal({
                 title: "Cannot Delete Profile",
                 message: "At least one profile must exist.",
-                onConfirm: resetModal,
-                onCancel: resetModal
+                showButtons: false
             });
             return;
         }
-        setConfirmModal({
-            isOpen: true,
+
+        const executeDeleteProfile = () => {
+            const { [key]: deletedProfile, ...remainingProfiles } = userProfile;
+    
+            if (key === currentProfileKey) {
+                const newKey = Object.keys(remainingProfiles)[0];
+                setCurrentProfileKey(newKey);
+            }
+
+            setUserProfile(remainingProfiles);
+            setIsOpen(false);
+        }
+
+        launchModal({
             title: "Delete Profile",
             message: `Are you sure you want to delete the profile "${userProfile[key].name}"?`,
-            onConfirm: () => {
-                const { [key]: deletedProfile, ...remainingProfiles } = userProfile;
-                if (key === currentProfileKey) {
-                    const newKey = Object.keys(remainingProfiles)[0];
-                    setCurrentProfileKey(newKey);
-                }
-                
-                setUserProfile(remainingProfiles);
-                setConfirmModal(prev => ({ ...prev, isOpen: false }));
-            },
-            onCancel: () => {
-                setConfirmModal(prev => ({ ...prev, isOpen: false }));
-            }
+            onConfirm: executeDeleteProfile,
+            showButtons: true
         });
     };
 
@@ -85,7 +85,7 @@ const Profile: React.FC<ProfileProps> = ({ userProfile, currentProfileKey, setCo
             handleAddProfile();
         }
     };
-    
+
     return <div className="profile-section">
         <div className="profile-header">
             <h3>Profiles</h3>

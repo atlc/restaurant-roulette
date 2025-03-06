@@ -1,34 +1,26 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { Restaurant, UserProfile, ConfirmationModal } from "./types";
-import { getUserProfile, persistUserProfile } from "./services/localStorage";
-import { DEFAULT_USER_PROFILE, INITIAL_MODAL_STATE } from "./constants/restaurants";
+import { Restaurant } from "./types";
 import Modal from "./components/Modal";
 import Profile from "./components/Profile";
+import { useModalStore, useProfileStore } from "./store";
+import Footer from "./components/Footer";
 
 const App = () => {
+    const currentProfileKey = useProfileStore(store => store.currentProfileKey)
+    const userProfile = useProfileStore(store => store.userProfile);
+    const setUserProfile = useProfileStore(store => store.setUserProfile);
+    
+    const launchModal = useModalStore(store => store.launch)
+    
     const [choice, setChoice] = useState("");
     const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-    const [userProfile, setUserProfile] = useState<UserProfile>(DEFAULT_USER_PROFILE);
-    const [currentProfileKey, setCurrentProfileKey] = useState<string>("keysys");
     const [newRestaurantName, setNewRestaurantName] = useState("");
     const [addRestaurantExpanded, setAddRestaurantExpanded] = useState(false);
-    const [confirmModal, setConfirmModal] = useState<ConfirmationModal>(INITIAL_MODAL_STATE);
-
-    const resetModal = () => {
-        setConfirmModal(INITIAL_MODAL_STATE);
-    }
-
-    useEffect(() => {
-        const profile = getUserProfile();
-        setUserProfile(profile);
-    }, []);
-
-    useEffect(() => {
-        persistUserProfile(userProfile);
-    }, [userProfile])
     
     useEffect(() => {
+        if (!userProfile[currentProfileKey]) return;
+        
         const updatedProfile = {
             ...userProfile,
             [currentProfileKey]: {
@@ -41,6 +33,8 @@ const App = () => {
     }, [restaurants]);
 
     useEffect(() => {
+        if (!userProfile[currentProfileKey]) return;
+        
         setRestaurants(userProfile[currentProfileKey].restaurants);
         
         const updatedUser = Object.assign({}, userProfile);
@@ -51,32 +45,13 @@ const App = () => {
         setUserProfile(updatedUser);
     }, [currentProfileKey]);
 
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && confirmModal.isOpen) {
-                confirmModal.onCancel();
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [confirmModal]);
 
     const handleRemoveRestaurant = (name: string) => {
-        setConfirmModal({
-            isOpen: true,
+        launchModal({
             title: "Remove Restaurant",
             message: `Are you sure you want to remove "${name}" from your list?`,
-            onConfirm: () => {
-                setRestaurants(restaurants.filter((rs) => rs.name !== name));
-                setConfirmModal(prev => ({ ...prev, isOpen: false }));
-            },
-            onCancel: () => {
-                setConfirmModal(prev => ({ ...prev, isOpen: false }));
-            }
-        });
+            onConfirm: () => setRestaurants(restaurants.filter((rs) => rs.name !== name))
+        })
     };
 
     const handleAdjustWeights = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,28 +129,16 @@ const App = () => {
         setAddRestaurantExpanded(!addRestaurantExpanded);
     };
 
-    const showPrivacyPolicy = () => {
-        setConfirmModal({
-            isOpen: true,
-            title: "Privacy Policy",
-            message: "Your data is not collected or shared with or by anyone. No cookies or tracking are used. All data is stored only locally, only in your browser.",
-            onConfirm: resetModal,
-            onCancel: resetModal,
-            showButtons: false
-        });
-    }
-
     return (
         <main>
-            <Profile
-                userProfile={userProfile}
-                currentProfileKey={currentProfileKey}
-                setConfirmModal={setConfirmModal}
-             />
+            <Modal />
+            <Profile />
 
             <div className="add-restaurant-section">
                 <div className="add-restaurant-header" onClick={toggleAddRestaurantSection}>
-                    <h3>Add New Restaurant for <span className="underline">{userProfile[currentProfileKey].name}</span></h3>
+                    <h3>Add New Restaurant for <span className="underline">
+                        {userProfile[currentProfileKey]?.name || 'Loading...'}
+                    </span></h3>
                     <div onClick={toggleAddRestaurantSection} className={`toggle-icon ${addRestaurantExpanded ? 'expanded' : ''}`}>
                         ▼
                     </div>
@@ -247,12 +210,7 @@ const App = () => {
                 </h1>
             </div>
 
-            <div className="footer">
-                <p>Made with ❤️ by <a className="text-green" href="https://github.com/atlc/restaurant-roulette">Cartwright</a></p>
-                <p className="text-green" onClick={showPrivacyPolicy}>Privacy Policy</p>
-            </div>
-
-            {confirmModal.isOpen && <Modal {...confirmModal} />}
+            <Footer />
         </main>
     );
 };

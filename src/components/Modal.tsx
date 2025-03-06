@@ -1,9 +1,17 @@
-import React from "react";
-import { ConfirmationModal } from "../types";
+import { useModalStore } from "../store";
 
+const Modal = () => {
+    const { title, isOpen, message, onCancel, onConfirm, showButtons, setIsOpen } = useModalStore();
 
-const Modal: React.FC<ConfirmationModal> = ({ onCancel, onConfirm, title, message, showButtons = true }) => {
-    return <div className="modal-overlay" onClick={onCancel}>
+    if (!isOpen) return <></>;
+
+    const handleClose = (e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === 'Escape') {
+            setIsOpen(false);
+        }
+    };
+
+    return <div onKeyDown={handleClose} className="modal-overlay" onClick={onCancel}>
         <div className="modal-container" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
                 <h3>{title}</h3>

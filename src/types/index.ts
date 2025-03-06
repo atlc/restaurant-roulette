@@ -12,6 +12,7 @@ export interface RestaurantProfile {
 export interface UserProfile {
     [key: string]: RestaurantProfile;
 }
+
 export interface ConfirmationModal {
     isOpen: boolean;
     title: string;
