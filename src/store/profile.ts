@@ -15,14 +15,14 @@ interface ProfileStore {
 }
 
 export const useProfileStore = create<ProfileStore>()(persist((set) => ({
-  currentProfileKey: '',
+  userProfile: DEFAULT_USER_PROFILE,
+  currentProfileKey: Object.keys(DEFAULT_USER_PROFILE)[0],
   newProfileName: '',
   addProfileExpanded: false,
-  userProfile: DEFAULT_USER_PROFILE,
-  setCurrentProfileKey: (key: string) => set({ currentProfileKey: key }),
-  setNewProfileName: (name: string) => set({ newProfileName: name }),
-  setAddProfileExpanded: (expanded: boolean) => set({ addProfileExpanded: expanded }),
-  setUserProfile: (profile: UserProfile) => set({ userProfile: profile }),
+  setUserProfile: (profile) => set({ userProfile: profile }),
+  setCurrentProfileKey: (key) => set({ currentProfileKey: key }),
+  setNewProfileName: (name) => set({ newProfileName: name }),
+  setAddProfileExpanded: (expanded) => set({ addProfileExpanded: expanded })
 }), {
   name: "profile",
 }));

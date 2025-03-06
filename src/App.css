@@ -160,6 +160,7 @@ label {
 /* Profile section */
 .profile-section {
   margin-bottom: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
   background-color: var(--secondary-bg);
   border-radius: var(--border-radius);
   padding: var(--spacing-md);
@@ -654,4 +655,31 @@ input[type="range"]::-moz-range-thumb:hover {
 
 .m-2 {
   margin: 2rem;
+}
+
+.weights-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 10px;
+}
+
+.weights-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.weights-content.expanded {
+  max-height: 1000px;
+}
+
+.weights-content .row {
+  margin: var(--spacing-sm) 0;
+}
+
+/* Make sure transparent rows (like the add restaurant input) don't get the margin */
+.weights-content .row[style*="transparent"] {
+  margin: 0;
 }

@@ -12,7 +12,7 @@ export const DEFAULT_BIRMINGHAM_RESTAURANTS: Restaurant[] = [
 ];
 
 const DEFAULT_KEYSYS_RESTAURANTS: Restaurant[] = [
-    { name: "Davenports", weight: 0.8 },
+    { name: "Davenport's", weight: 0.8 },
     { name: "Waldo's", weight: 0.5 },
     { name: "Maro", weight: 0.5 },
     { name: "Buffalo Wild Wings", weight: 0.5 },
