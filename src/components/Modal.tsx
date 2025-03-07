@@ -1,17 +1,26 @@
 import { useModalStore } from "../store";
+import { useEffect } from "react";
 
 const Modal = () => {
-    const { title, isOpen, message, onCancel, onConfirm, showButtons, setIsOpen } = useModalStore();
+    const { title, isOpen, message, onCancel, onConfirm, showButtons } = useModalStore();
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && isOpen) {
+                onCancel();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isOpen, onCancel]);
 
     if (!isOpen) return <></>;
 
-    const handleClose = (e: React.KeyboardEvent<HTMLDivElement>) => {
-        if (e.key === 'Escape') {
-            setIsOpen(false);
-        }
-    };
-
-    return <div onKeyDown={handleClose} className="modal-overlay" onClick={onCancel}>
+    return <div className="modal-overlay" onClick={onCancel}>
         <div className="modal-container" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
                 <h3>{title}</h3>

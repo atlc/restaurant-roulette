@@ -22,14 +22,14 @@ const DEFAULT_KEYSYS_RESTAURANTS: Restaurant[] = [
 ];
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
-    keysys: {
+    keysys_hq: {
         isActive: true,
         name: "KeySys HQ",
         restaurants: DEFAULT_KEYSYS_RESTAURANTS,
     },
-    downtown: {
+    birmingham: {
         isActive: false,
-        name: "Downtown",
+        name: "Birmingham",
         restaurants: DEFAULT_BIRMINGHAM_RESTAURANTS,
     },
 };

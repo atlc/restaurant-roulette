@@ -88,6 +88,20 @@ button:active {
   transform: translateY(0);
 }
 
+button:disabled {
+  background-color: #6c757d;
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+button:disabled:hover {
+  opacity: 0.5;
+  transform: none;
+  box-shadow: none;
+}
+
 .success-button {
   background-color: var(--accent-color);
 }
@@ -382,6 +396,10 @@ input[type="range"]::-moz-range-thumb:hover {
   margin-bottom: var(--spacing-lg);
 }
 
+.random-choice-section button {
+  margin: var(--spacing-sm) var(--spacing-md);
+}
+
 .random-choice-section h1 {
   margin-top: var(--spacing-md);
   padding: var(--spacing-md);
@@ -486,6 +504,17 @@ input[type="range"]::-moz-range-thumb:hover {
   .profile-item {
     min-width: 120px;
     width: 100%;
+  }
+  
+  .profile-import-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .profile-import-row input {
+    width: 100%;
+    min-width: 0;
+    margin-bottom: var(--spacing-sm);
   }
 }
 
@@ -682,4 +711,21 @@ input[type="range"]::-moz-range-thumb:hover {
 /* Make sure transparent rows (like the add restaurant input) don't get the margin */
 .weights-content .row[style*="transparent"] {
   margin: 0;
+}
+
+/* Import profile input */
+.profile-import-row {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.profile-import-row input {
+  flex: 1;
+  min-width: 300px;
+}
+
+.profile-import-row button {
+  flex-shrink: 0;
 }

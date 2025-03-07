@@ -11,6 +11,7 @@ const Restaurants = () => {
     const [restaurantWeightsExpanded, setRestaurantWeightsExpanded] = useState(false);
 
     const launchModal = useModalStore(store => store.launch);
+    const setIsOpen = useModalStore(store => store.setIsOpen)
 
     const userProfile = useProfileStore(store => store.userProfile);
     const currentProfileKey = useProfileStore(store => store.currentProfileKey);
@@ -48,7 +49,11 @@ const Restaurants = () => {
         launchModal({
             title: "Remove Restaurant",
             message: `Are you sure you want to remove "${name}" from your list?`,
-            onConfirm: () => setRestaurants(restaurants.filter((rs) => rs.name !== name))
+            onConfirm: () => { 
+                setRestaurants(restaurants.filter((rs) => rs.name !== name));
+                setIsOpen(false);
+            },
+            showButtons: true
         })
     };
 
@@ -79,7 +84,6 @@ const Restaurants = () => {
             setNewRestaurantName('');
         }
     };
-
     
     const calculateRandomChoice = () => {
         if (!totalWeight) {
@@ -123,26 +127,26 @@ const Restaurants = () => {
         return "#6bff6b";
     };
 
+    const getWeightedOddsFormatted = (restaurant: Restaurant) => {
+        const odds = Math.round((restaurant.weight * 100) / totalWeight);
+        return `${restaurant.name} ~${odds}%`
+    }
+
     return (
         <>
             <div className="random-choice-section">
-                <div>
-                    <button onClick={calculateRandomChoice}>
-                        {!choice ? "Random Choice!" : "Try Again?"}
-                    </button>
-                </div>
                 <h1>
-                    <strong>{choice || "Ready to choose!"}</strong>
+                    <strong onClick={calculateRandomChoice}>{choice ? choice + "! Try again?" : "Click to get a random choice!"}</strong>
                 </h1>
             </div>
             <div className="container">
                 <div className="weights-header" onClick={() => setRestaurantWeightsExpanded(!restaurantWeightsExpanded)}>
-                    <h3>Restaurant Management</h3>
+                    <h3>Manage Restaurants & Weights for <span className='underline'>{userProfile[currentProfileKey].name}</span></h3>
                     <div className={`toggle-icon ${restaurantWeightsExpanded ? 'expanded' : ''}`}>
                         ▼
                     </div>
                 </div>
-                <p>{!restaurantWeightsExpanded && `Rough odds: ${restaurants.map(r => `${r.name} ~${Math.round((r.weight * 100)/totalWeight)}%`).join(', ')}`}</p>
+                <p>{!restaurantWeightsExpanded && `Rough odds: ${restaurants.map(getWeightedOddsFormatted).join(', ')}`}</p>
 
                 <div className={`weights-content ${restaurantWeightsExpanded ? 'expanded' : ''}`}>
                     {restaurants.length === 0 ? (

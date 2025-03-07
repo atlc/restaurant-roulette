@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { useProfileStore } from "../store/profile";
 import { useModalStore } from "../store/modal";
+import { RestaurantProfile } from "../types";
 
 const Profile = () => {
+    const [importedProfile, setImportedProfile] = useState("");
+
     const userProfile = useProfileStore(store => store.userProfile);
     const currentProfileKey = useProfileStore(store => store.currentProfileKey);
     const newProfileName = useProfileStore(store => store.newProfileName);
@@ -80,11 +83,32 @@ const Profile = () => {
         });
     };
 
-    const handleProfileKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleEnterForNewProfile = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             handleAddProfile();
         }
     };
+
+    const handleExportProfile = (key: string) => {
+        const profile = userProfile[key];
+        const json = JSON.stringify(profile);
+        window.navigator.clipboard.writeText(json);
+        launchModal({
+            title: `"${profile.name}" Copied to Clipboard`,
+            message: json,
+            showButtons: false
+        });
+    }
+
+    const handleImportProfile = () => {
+        const profile = JSON.parse(importedProfile) as RestaurantProfile;
+        const key = profile.name.trim().toLowerCase().replace(/\s+/g, '_');
+        setUserProfile({
+            ...userProfile,
+            [key]: profile
+        });
+        setImportedProfile('');
+    }
 
     return <div className="profile-section">
         <div className="profile-header">
@@ -101,16 +125,35 @@ const Profile = () => {
                     placeholder="Enter new profile name"
                     value={newProfileName}
                     onChange={(e) => setNewProfileName(e.target.value)}
-                    onKeyDown={handleProfileKeyDown}
+                    onKeyDown={handleEnterForNewProfile}
                 />
                 <button className="success-button" onClick={handleAddProfile}>Add Profile</button>
             </div>
 
-            <h4 className="profile-management-title">Manage Profiles</h4>
+            <hr />
+
+            <div className="row profile-import-row">
+                <input
+                    type="text"
+                    placeholder={`{"name":"Work","restaurants":[{"name":"Foo","weight":0.5},{"name":"Bar","weight":0.5},{"name":"Baz's","weight":0.5}]}`}
+                    value={importedProfile}
+                    onChange={(e) => setImportedProfile(e.target.value)}
+                />
+                <button 
+                    disabled={!importedProfile} 
+                    className="success-button" 
+                    onClick={handleImportProfile}
+                >
+                    Import Profile
+                </button>
+            </div>
+
+            <h4 className="profile-management-title">Manage Existing Profiles</h4>
             <div className="profile-management-list">
                 {Object.keys(userProfile).map((key) => (
                     <div className="profile-management-item" key={`manage-${key}`}>
                         <span>{userProfile[key].name}</span>
+                        <span onClick={() => handleExportProfile(key)}>Export</span>
                         {Object.keys(userProfile).length > 1 && (
                             <span
                                 className="remove-btn"
