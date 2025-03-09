@@ -8,8 +8,8 @@ const App = () => {
     return (
         <main>
             <Modal />
-            <Restaurants />
             <Profile />
+            <Restaurants />
             <Footer />
         </main>
     );

@@ -6,7 +6,7 @@ const Footer = () => {
     const showPrivacyPolicy = () => {
         launchModal({
             title: "Privacy Policy",
-            message: "Your data is not collected or shared with or by anyone. No cookies or tracking are used. All data is stored only locally, only in your browser.",
+            message: "Your data is not collected or shared with or by anyone. No cookies or tracking are used. All data is stored only locally in your browser.",
             showButtons: false
         })
     }
